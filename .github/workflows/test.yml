@@ -1,0 +1,45 @@
+name: test
+on: [ push, pull_request ]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        emacs_version:
+          - 27.2
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install emacs
+        uses: purcell/setup-emacs@master
+        with:
+          version: ${{ matrix.emacs_version }}
+
+      - name: Install Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.9"
+          architecture: "x64"
+
+      - name: Setup Go
+        uses: actions/setup-go@v2
+
+      - name: Setup Clang
+        uses: egor-tensin/setup-clang@v1
+
+      - name: Install Dependencies
+        run: |
+          pip install epc pyright
+          go install golang.org/x/tools/gopls@latest
+
+      - name: test
+        run: python3 -m test.test
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        if: ${{ failure() }}
+        with:
+          name: test-log
+          path: test.log
+          retention-days: 3
