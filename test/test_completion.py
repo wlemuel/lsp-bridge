@@ -85,3 +85,17 @@ class SimpleCompletion(unittest.TestCase):
     #         expectation="clear()",
     #         mode="c++-mode",
     #     ))
+#
+#     def test_go(self):
+#         try_completion(SingleFile(
+#             filename="test.go",
+#             code="""
+# package main
+#
+# import "os"
+#
+# func main() {
+# \tos.""",
+#             expectation="Open",
+#             mode="go-mode",
+#         ))
