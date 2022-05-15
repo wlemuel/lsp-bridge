@@ -41,7 +41,7 @@ def try_completion(file: SingleFile):
             (insert "{file.code[-1]}")
             ))
         """)
-        time.sleep(10)
+        time.sleep(20)
         assert any(must_include_completion(e, file.expectation) for e in calls)
     os.remove(t_file.name)
 
@@ -62,30 +62,30 @@ class SimpleCompletion(unittest.TestCase):
             mode="python-mode",
         ))
 
-#     def test_cpp(self):
-#         try_completion(SingleFile(
-#             filename="test.cpp",
-#             code="""
-#                     #include <vector>
-#
-#                     int main() {
-#                       std::vector<int> v;
-#                       v.""",
-#             expectation="clear()",
-#             mode="c++-mode",
-#         ))
-#         try_completion(SingleFile(
-#             filename="test.cpp",
-#             code="""
-#             #include <vector>
-#
-#             int main() {
-#               auto v = new std::vector<int>();
-#               v->""",
-#             expectation="clear()",
-#             mode="c++-mode",
-#         ))
-#
+    # def test_cpp(self):
+    #     try_completion(SingleFile(
+    #         filename="test.cpp",
+    #         code="""
+    #                 #include <vector>
+    #
+    #                 int main() {
+    #                   std::vector<int> v;
+    #                   v.""",
+    #         expectation="clear()",
+    #         mode="c++-mode",
+    #     ))
+    #     try_completion(SingleFile(
+    #         filename="test.cpp",
+    #         code="""
+    #         #include <vector>
+    #
+    #         int main() {
+    #           auto v = new std::vector<int>();
+    #           v->""",
+    #         expectation="clear()",
+    #         mode="c++-mode",
+    #     ))
+
     def test_go(self):
         try_completion(SingleFile(
             filename="test.go",
