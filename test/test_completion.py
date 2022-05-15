@@ -26,7 +26,7 @@ def must_include_completion(e: Tuple[str, List[Any]], completion: str):
 
 
 def try_completion(file: SingleFile):
-    t_file = tempfile.NamedTemporaryFile(delete=False)
+    t_file = tempfile.NamedTemporaryFile(delete=False, suffix=file.filename)
     t_file.write(file.code[:-1].encode('utf-8'))
     t_file.close()
 
@@ -62,29 +62,29 @@ class SimpleCompletion(unittest.TestCase):
             mode="python-mode",
         ))
 
-    # def test_cpp(self):
-    #     try_completion(SingleFile(
-    #         filename="test.cpp",
-    #         code="""
-    #                 #include <vector>
-    #
-    #                 int main() {
-    #                   vector<int> v;
-    #                   v.""",
-    #         expectation="clear()",
-    #         mode="c++-mode",
-    #     ))
-    #     try_completion(SingleFile(
-    #         filename="test.cpp",
-    #         code="""
-    #         #include <vector>
-    #
-    #         int main() {
-    #           auto v = new std::vector<int>();
-    #           v->""",
-    #         expectation="clear()",
-    #         mode="c++-mode",
-    #     ))
+#     def test_cpp(self):
+#         try_completion(SingleFile(
+#             filename="test.cpp",
+#             code="""
+#                     #include <vector>
+#
+#                     int main() {
+#                       std::vector<int> v;
+#                       v.""",
+#             expectation="clear()",
+#             mode="c++-mode",
+#         ))
+#         try_completion(SingleFile(
+#             filename="test.cpp",
+#             code="""
+#             #include <vector>
+#
+#             int main() {
+#               auto v = new std::vector<int>();
+#               v->""",
+#             expectation="clear()",
+#             mode="c++-mode",
+#         ))
 #
 #     def test_go(self):
 #         try_completion(SingleFile(
