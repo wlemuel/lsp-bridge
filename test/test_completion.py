@@ -41,7 +41,7 @@ def try_completion(file: SingleFile):
             (insert "{file.code[-1]}")
             ))
         """)
-        time.sleep(20)
+        time.sleep(10)
         assert any(must_include_completion(e, file.expectation) for e in calls)
     os.remove(t_file.name)
 
@@ -70,7 +70,7 @@ class SimpleCompletion(unittest.TestCase):
     #
     #                 int main() {
     #                   std::vector<int> v;
-    #                   v.""",
+    #                   v.cle""",
     #         expectation="clear()",
     #         mode="c++-mode",
     #     ))
@@ -81,7 +81,7 @@ class SimpleCompletion(unittest.TestCase):
     #
     #         int main() {
     #           auto v = new std::vector<int>();
-    #           v->""",
+    #           v->cle""",
     #         expectation="clear()",
     #         mode="c++-mode",
     #     ))
