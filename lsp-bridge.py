@@ -44,8 +44,8 @@ class LspBridge:
         self.action_cache_dict: Dict[str, list] = defaultdict(list)  # use for contain file action cache
 
         # Build EPC interfaces.
-        for cls in Handler.__subclasses__():
-            self.build_file_action_function(cls.name)
+        for method in list(map(lambda x: x.name, Handler.__subclasses__())) + ['change_file']:
+            self.build_file_action_function(method)
 
         # Init EPC client port.
         init_epc_client(int(args[0]))
@@ -134,7 +134,8 @@ class LspBridge:
                 message_queue=self.message_queue,
                 project_path=project_path,
                 server_info=lang_server_info,
-                server_name=lsp_server_name
+                server_name=lsp_server_name,
+                lsp_server_dict=self.lsp_server_dict,
             )
 
         lsp_server = self.lsp_server_dict[lsp_server_name]

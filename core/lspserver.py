@@ -23,6 +23,7 @@ import json
 import os
 import queue
 import re
+import signal
 import subprocess
 import threading
 import traceback
@@ -179,11 +180,6 @@ class LspServer:
         self.request_dict = {}
         self.root_path = self.project_path
         self.lsp_server_dict = lsp_server_dict
-
-        # All LSP server response running in ls_message_thread.
-        self.lsp_message_queue = queue.Queue()
-        self.ls_message_thread = threading.Thread(target=self.lsp_message_dispatcher)
-        self.ls_message_thread.start()
 
         # LSP server information.
         self.completion_trigger_characters = list()
@@ -413,9 +409,9 @@ class LspServer:
 
             # Don't need to wait LSP server response, kill immediately.
             if self.p is not None:
-                os.kill(self.p.pid, 9)
+                os.kill(self.p.pid, signal.SIGKILL)
 
             logger.info("Exit server: {}".format(self.server_name))
-            del self.lsp_server_dict[self.server_name]
+            self.lsp_server_dict.pop(self.server_name)
 
 
