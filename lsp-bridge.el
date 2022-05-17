@@ -133,6 +133,11 @@ Setting this to nil or 0 will turn off the indicator."
   :type 'boolean
   :group 'lsp-bridge)
 
+(defcustom lsp-bridge-enable-signature-help nil
+  "Whether to enable signature-help."
+  :type 'boolean
+  :group 'lsp-bridge)
+
 (defface lsp-bridge-font-lock-flash
   '((t (:inherit highlight)))
   "Face to flash the current line."
@@ -241,6 +246,7 @@ Then LSP-Bridge will start by gdb, please send new issue with `*lsp-bridge*' buf
     ((clojure-mode clojurec-mode clojurescript-mode clojurex-mode) . "clojure-lsp")
     ((sh-mode) . "bash-language-server")
     ((css-mode) . "vscode-css-language-server")
+    (elm-mode . "elm-language-server")
     )
   "The lang server rule for file mode."
   :type 'cons)
@@ -277,7 +283,8 @@ Then LSP-Bridge will start by gdb, please send new issue with `*lsp-bridge*' buf
     clojurex-mode-hook
     sh-mode-hook
     web-mode-hook
-    css-mode-hook)
+    css-mode-hook
+    elm-mode-hook)
   "The default mode hook to enable lsp-bridge."
   :type 'list)
 
@@ -496,7 +503,11 @@ Then LSP-Bridge will start by gdb, please send new issue with `*lsp-bridge*' buf
              (let* ((candidate-label (plist-get item :label)))
                (unless (zerop (length candidate-label))
                  (put-text-property 0 1 'lsp-bridge--lsp-item item candidate-label))
-               candidate-label))
+               ;; We add blank after `label' with different annotation, 
+               ;; avoid corfu filter candidate with same label name. 
+               (if (string-equal (plist-get item :annotation) "Snippet")
+                   (format "%s " candidate-label)
+                 candidate-label)))
            lsp-bridge-completion-items))
          (bounds (bounds-of-thing-at-point 'symbol)))
     (list
@@ -526,18 +537,39 @@ Then LSP-Bridge will start by gdb, please send new issue with `*lsp-bridge*' buf
          ;; A lookup should fix that (github#148)
          (let* ((item (get-text-property 0 'lsp-bridge--lsp-item (cl-find candidate candidates :test #'string=)))
                 (insert-text (plist-get item :insertText))
-                (additionalTextEdits (if lsp-bridge-enable-auto-import (plist-get item :additionalTextEdits) nil)))
-           ;; Remove candidate label and insert candidate insertText
-           (delete-region (- (point) (length candidate)) (point))
-           (insert insert-text)
+                (additionalTextEdits (if lsp-bridge-enable-auto-import (plist-get item :additionalTextEdits) nil))
+                (kind (plist-get item :kind)))
 
            ;; Do auto-imprt action.
            (with-current-buffer
                (if (minibufferp) (window-buffer (minibuffer-selected-window))
                  (current-buffer))
-             (when (cl-plusp (length additionalTextEdits))
-               (lsp-bridge--apply-text-edits additionalTextEdits)))
+
+             (let ((snippet-fn (and (string= kind "Snippet")
+                                    (lsp-bridge--snippet-expansion-fn))))
+               (cond (snippet-fn
+                      ;; A snippet should be inserted, but using plain
+                      ;; `insertText'.  This requires us to delete the
+                      ;; whole completion, since `insertText' is the full
+                      ;; completion's text.
+                      (delete-region (- (point) (length candidate)) (point))
+                      (funcall snippet-fn insert-text))
+                     (insert-text
+                      ;; Remove candidate label and insert candidate insertText
+                      (delete-region (- (point) (length candidate)) (point))
+                      (insert insert-text)
+
+                      (when (cl-plusp (length additionalTextEdits))
+                        (lsp-bridge--apply-text-edits additionalTextEdits))))))
            ))))))
+
+;; Copy from eglot
+(defun lsp-bridge--snippet-expansion-fn ()
+  "Compute a function to expand snippets.
+Doubles as an indicator of snippet support."
+  (and (boundp 'yas-minor-mode)
+       (symbol-value 'yas-minor-mode)
+       'yas-expand-snippet))
 
 ;; Copy from eglot
 (defun lsp-bridge--apply-text-edits (edits &optional version)
@@ -754,6 +786,7 @@ If optional MARKER, return a marker instead"
     (find-file filepath))
 
   (lsp-bridge--goto-position position)
+  (recenter)
 
   ;; Flash define line.
   (require 'pulse)
@@ -793,6 +826,20 @@ If optional MARKER, return a marker instead"
 
 (defun lsp-bridge-hide-doc-tooltip ()
   (posframe-hide lsp-bridge-lookup-doc-tooltip))
+
+(defun lsp-bridge-show-signature-help (help)
+  (cond
+   ;; Trim signature help length make sure `awesome-tray' won't wrap line display.
+   ((ignore-errors (require 'awesome-tray))
+    (message (substring help
+                        0
+                        (min (string-width help)
+                             (- (awesome-tray-get-frame-width)
+                                (string-width (awesome-tray-build-active-info))
+                                )))))
+   ;; Other minibuffer plugin similar `awesome-tray' welcome to send PR here. ;)
+   (t
+    (message help))))
 
 (defvar lsp-bridge--last-buffer nil)
 

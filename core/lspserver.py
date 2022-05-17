@@ -169,7 +169,7 @@ class LspServerReceiver(Thread):
 
 class LspServer:
 
-    def __init__(self, message_queue, project_path, server_info, server_name):
+    def __init__(self, message_queue, project_path, server_info, server_name, lsp_server_dict):
         # Init.
         self.message_queue = message_queue
         self.project_path = project_path
@@ -178,6 +178,12 @@ class LspServer:
         self.server_name = server_name
         self.request_dict = {}
         self.root_path = self.project_path
+        self.lsp_server_dict = lsp_server_dict
+
+        # All LSP server response running in ls_message_thread.
+        self.lsp_message_queue = queue.Queue()
+        self.ls_message_thread = threading.Thread(target=self.lsp_message_dispatcher)
+        self.ls_message_thread.start()
 
         # LSP server information.
         self.completion_trigger_characters = list()
@@ -408,3 +414,8 @@ class LspServer:
             # Don't need to wait LSP server response, kill immediately.
             if self.p is not None:
                 os.kill(self.p.pid, 9)
+
+            logger.info("Exit server: {}".format(self.server_name))
+            del self.lsp_server_dict[self.server_name]
+
+

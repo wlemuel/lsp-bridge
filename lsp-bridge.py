@@ -44,10 +44,6 @@ class LspBridge:
         self.action_cache_dict: Dict[str, list] = defaultdict(list)  # use for contain file action cache
 
         # Build EPC interfaces.
-        for name in ["change_file", "find_define", "find_implementation", "find_references",
-                     "prepare_rename", "rename", "change_cursor", "save_file", "hover", "signature_help"]:
-            self.build_file_action_function(name)
-
         for cls in Handler.__subclasses__():
             self.build_file_action_function(cls.name)
 
@@ -111,10 +107,12 @@ class LspBridge:
             message = self.message_queue.get(True)
             if message["name"] == "server_file_opened":
                 self.handle_server_file_opened(message["content"])
-            elif message["name"] == "server_process_exit":
-                self.handle_server_process_exit(message["content"])
             elif message["name"] == "server_response_message":
                 self.handle_server_message(*message["content"])
+            elif message["name"] == "make_lsp_location_link_file_action":
+                filepath = message["content"]["filepath"]
+                file_action = message["content"]["file_action"]
+                self.file_action_dict[path_as_key(filepath)] = file_action
 
             self.message_queue.task_done()
 
@@ -206,11 +204,6 @@ class LspBridge:
         else:
             # Please report bug if you got this message.
             logger.error("IMPOSSIBLE HERE: handle_server_message {} {} {} {}".format(filepath, request_type, request_id, response_result))
-
-    def handle_server_process_exit(self, server_name):
-        if server_name in self.lsp_server_dict:
-            logger.info("Exit server: {}".format(server_name))
-            del self.lsp_server_dict[server_name]
 
     def handle_server_file_opened(self, filepath):
         file_key = path_as_key(filepath)
