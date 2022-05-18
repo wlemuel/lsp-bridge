@@ -81,9 +81,6 @@
 (require 'corfu)
 (require 'markdown-mode)
 
-;; Add completion history.
-(corfu-history-mode t)
-
 (defgroup lsp-bridge nil
   "LSP-Bridge group."
   :group 'applications)
