@@ -81,7 +81,6 @@
 (require 'corfu)
 (require 'corfu-info)
 (require 'corfu-history)
-(require 'posframe)
 (require 'markdown-mode)
 
 ;; Add completion history.
