@@ -823,8 +823,7 @@ If optional MARKER, return a marker instead"
           (posframe-delete lsp-bridge-lookup-doc-tooltip)
           (other-frame 0))))))
 
-(defun lsp-bridge-hide-doc-tooltip ()
-  (posframe-hide lsp-bridge-lookup-doc-tooltip))
+(defun lsp-bridge-hide-doc-tooltip ())
 
 (defun lsp-bridge-show-signature-help (help)
   (cond
