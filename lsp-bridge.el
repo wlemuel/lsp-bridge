@@ -79,7 +79,6 @@
 (require 'lsp-bridge-epc)
 (require 'lsp-bridge-ref)
 (require 'corfu)
-(require 'corfu-history)
 (require 'markdown-mode)
 
 ;; Add completion history.
