@@ -497,8 +497,8 @@ Then LSP-Bridge will start by gdb, please send new issue with `*lsp-bridge*' buf
              (let* ((candidate-label (plist-get item :label)))
                (unless (zerop (length candidate-label))
                  (put-text-property 0 1 'lsp-bridge--lsp-item item candidate-label))
-               ;; We add blank after `label' with different annotation, 
-               ;; avoid corfu filter candidate with same label name. 
+               ;; We add blank after `label' with different annotation,
+               ;; avoid corfu filter candidate with same label name.
                (if (string-equal (plist-get item :annotation) "Snippet")
                    (format "%s " candidate-label)
                  candidate-label)))
@@ -804,19 +804,8 @@ If optional MARKER, return a marker instead"
           (let ((view-inhibit-help-message t))
             (gfm-view-mode))
         (gfm-mode))
-      (font-lock-ensure))
-    (when (posframe-workable-p)
-      (posframe-show lsp-bridge-lookup-doc-tooltip
-                     :position (point)
-                     :internal-border-width lsp-bridge-lookup-doc-tooltip-border-width
-                     :background-color background-color
-                     :max-width lsp-bridge-lookup-doc-tooltip-max-width
-                     :max-height lsp-bridge-lookup-doc-tooltip-max-height)
-      (unwind-protect
-          (push (read-event) unread-command-events)
-        (progn
-          (posframe-delete lsp-bridge-lookup-doc-tooltip)
-          (other-frame 0))))))
+      (font-lock-ensure)
+      (display-buffer (current-buffer)))))
 
 (defun lsp-bridge-hide-doc-tooltip ())
 
