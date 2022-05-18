@@ -843,6 +843,7 @@ If optional MARKER, return a marker instead"
 
 (defvar lsp-bridge--last-buffer nil)
 
+;;;###autoload
 (defun lsp-bridge-monitor-window-buffer-change ()
   ;; Hide completion frame when buffer or window changed.
   (unless (eq (current-buffer)
@@ -853,6 +854,7 @@ If optional MARKER, return a marker instead"
               (string-equal (buffer-name) "*Messages*"))
     (setq lsp-bridge--last-buffer (current-buffer))))
 
+;;;###autoload
 (add-hook 'post-command-hook 'lsp-bridge-monitor-window-buffer-change)
 
 (defconst lsp-bridge--internal-hooks
