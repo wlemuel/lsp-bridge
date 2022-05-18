@@ -853,7 +853,6 @@ If optional MARKER, return a marker instead"
               (string-equal (buffer-name) "*Messages*"))
     (setq lsp-bridge--last-buffer (current-buffer))))
 
-;;;###autoload
 (add-hook 'post-command-hook 'lsp-bridge-monitor-window-buffer-change)
 
 (defconst lsp-bridge--internal-hooks
